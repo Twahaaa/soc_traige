@@ -1,0 +1,37 @@
+# Root .gitignore for soc_triage
+
+# Node/Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env*
+frontend/*.log
+frontend/.pnp
+frontend/.pnp.*
+frontend/.yarn/
+frontend/.vercel
+frontend/coverage/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Python/Backend
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/.venv/
+backend/.env
+backend/.pytest_cache/
+backend/.python-version
+backend/build/
+backend/dist/
+backend/wheels/
+backend/*.egg-info
+
+# General
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+*.pem
