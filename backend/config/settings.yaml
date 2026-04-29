@@ -1,0 +1,55 @@
+redis:
+  host: localhost
+  port: 6379
+
+qdrant:
+  host: localhost
+  port: 6333
+  collection: triage_reports
+
+neurallog:
+  window_size: 20
+  step_size: 1
+  anomaly_threshold: 0.5
+  bert_model: bert-base-uncased
+  embedding_cache_dir: data/embeddings
+  # Paper defaults for reference (Le & Zhang, ASE 2021):
+  # nhead: 8, num_layers: 6
+  # Reduced for development/synthetic training:
+  nhead: 2
+  num_layers: 2
+  dim_feedforward: 512
+  dropout: 0.1
+
+embedding:
+  report_model: all-MiniLM-L6-v2
+  report_dim: 384
+
+llm:
+  provider: groq            # groq (default) or ollama (fallback)
+  ollama_model: gemma3:4b
+  ollama_base_url: http://localhost:11434
+  groq_model: llama3-70b-8192
+  # groq_api_key loaded from GROQ_API_KEY env var
+
+api:
+  # abuseipdb_key loaded from ABUSEIPDB_API_KEY env var
+  # nvd_api_key loaded from NVD_API_KEY env var
+  nvd_rate_limit_no_key: 5     # requests per 30 seconds
+  nvd_rate_limit_with_key: 50
+
+prefilter:
+  critical_keywords:
+    - CRITICAL
+    - EMERGENCY
+    - FATAL
+  auth_fail_threshold: 5
+  auth_fail_window_seconds: 60
+  privilege_escalation_patterns:
+    - "sudo.*COMMAND=/bin/bash"
+    - "sudo.*COMMAND=/bin/sh"
+    - "su.*authentication failure"
+
+dashboard:
+  fastapi_port: 8000
+  nextjs_port: 3000
