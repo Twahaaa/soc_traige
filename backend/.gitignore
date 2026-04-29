@@ -1,0 +1,7 @@
+data/raw/
+data/embeddings/
+data/models/
+.env
+__pycache__/
+*.pyc
+.venv/
