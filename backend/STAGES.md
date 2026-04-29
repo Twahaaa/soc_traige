@@ -12,15 +12,15 @@ This file tracks stage-by-stage progress and required checkpoints.
 - [x] Verify brute-force rule fires (`brute_force:<ip>`)
 
 ## Stage 2: Preprocessing + Sequence Construction
-- [ ] Implement tokenizer (parsing-free)
-- [ ] Implement sliding window sequence builder
-- [ ] Route sequences to `stream:queue_a` or `stream:queue_b`
-- [ ] Implement HDFS loader (block ID grouping)
-- [ ] Implement BGL loader (chronological windows)
-- [ ] Add AIT loader stub (NotImplementedError)
-- [ ] Add dataset download script
-- [ ] Verify `sequence_builder` runs and routes correctly
-- [ ] Verify messages appear in `stream:queue_a` and `stream:queue_b`
+- [x] Implement tokenizer (parsing-free)
+- [x] Implement sliding window sequence builder
+- [x] Route sequences to `stream:queue_a` or `stream:queue_b`
+- [x] Implement HDFS loader (block ID grouping)
+- [x] Implement BGL loader (chronological windows)
+- [x] Add AIT loader stub (NotImplementedError)
+- [x] Add dataset download script
+- [x] Verify `sequence_builder` runs and routes correctly
+- [x] Verify messages appear in `stream:queue_a` and `stream:queue_b`
 
 ## Stage 3: Anomaly Detection (NeuralLog + Queue Workers)
 - [ ] Implement NeuralLog model
