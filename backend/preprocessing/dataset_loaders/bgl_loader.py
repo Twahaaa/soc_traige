@@ -30,8 +30,12 @@ class BGLLoader:
         data_dir: str,
         window_size: int = 20,
         step_size: int = 1,
+        max_lines: int | None = None,
     ) -> Iterator[dict[str, Any]]:
-        """Yield sliding windows with labels derived from anomalous lines."""
+        """Yield sliding windows with labels derived from anomalous lines.
+
+        Use ``max_lines`` for a lightweight preview on very large datasets.
+        """
         if window_size <= 0:
             raise ValueError("window_size must be greater than zero")
         if step_size <= 0:
@@ -43,7 +47,10 @@ class BGLLoader:
 
         records: list[dict[str, Any]] = []
         with log_path.open("r", encoding="utf-8", errors="ignore") as handle:
-            for raw_line in handle:
+            for line_index, raw_line in enumerate(handle):
+                if max_lines is not None and line_index >= max_lines:
+                    break
+
                 line = raw_line.strip()
                 if not line:
                     continue

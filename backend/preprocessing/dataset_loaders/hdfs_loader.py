@@ -57,23 +57,40 @@ def _load_label_map(label_path: Path) -> dict[str, int]:
 class HDFSLoader:
     """Load HDFS block sequences grouped by block identifier."""
 
-    def load_sequences(self, data_dir: str) -> Iterator[dict[str, Any]]:
-        """Yield tokenized block sequences with anomaly labels."""
+    def load_sequences(
+        self,
+        data_dir: str,
+        max_lines: int | None = None,
+    ) -> Iterator[dict[str, Any]]:
+        """Yield tokenized block sequences with anomaly labels.
+
+        Use ``max_lines`` for a lightweight preview on very large datasets.
+        """
         base_dir = Path(data_dir)
         log_path = base_dir / "HDFS.log"
-        label_path = base_dir / "anomaly_label.csv"
+        label_candidates = [
+            base_dir / "anomaly_label.csv",
+            base_dir / "preprocessed" / "anomaly_label.csv",
+        ]
+        label_path = next((path for path in label_candidates if path.exists()), None)
 
         if not log_path.exists():
             raise FileNotFoundError(f"Missing HDFS log file: {log_path}")
-        if not label_path.exists():
-            raise FileNotFoundError(f"Missing HDFS label file: {label_path}")
+        if label_path is None:
+            raise FileNotFoundError(
+                "Missing HDFS label file: expected one of "
+                f"{', '.join(str(path) for path in label_candidates)}"
+            )
 
         label_map = _load_label_map(label_path)
         grouped_lines: "OrderedDict[str, list[str]]" = OrderedDict()
         grouped_timestamps: dict[str, list[str]] = {}
 
         with log_path.open("r", encoding="utf-8", errors="ignore") as handle:
-            for raw_line in handle:
+            for line_index, raw_line in enumerate(handle):
+                if max_lines is not None and line_index >= max_lines:
+                    break
+
                 line = raw_line.strip()
                 if not line:
                     continue
