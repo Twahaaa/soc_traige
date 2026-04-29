@@ -12,6 +12,8 @@ def generate_logs(
     mode: str = "normal",
     rate: float = 10.0,
     count: Optional[int] = None,
+    sleep: bool = True,
+    start_time: datetime | None = None,
 ) -> Generator[dict, None, None]:
     """Yield synthetic log entries at a fixed rate.
 
@@ -19,6 +21,8 @@ def generate_logs(
         mode: "normal" for mostly benign traffic, "attack" for mostly malicious.
         rate: Lines per second.
         count: Total lines to produce, or None to stream indefinitely.
+        sleep: If False, yield as fast as possible for offline training.
+        start_time: Optional starting timestamp for the synthetic stream.
     """
     if mode not in {"normal", "attack"}:
         raise ValueError("mode must be 'normal' or 'attack'")
@@ -53,7 +57,7 @@ def generate_logs(
     else:
         attack_probability = 0.6
 
-    current_time = datetime(2024, 5, 15, 10, 23, 1)
+    current_time = start_time or datetime(2024, 5, 15, 10, 23, 1)
     produced = 0
 
     while True:
@@ -84,4 +88,5 @@ def generate_logs(
 
         # Advance timestamps so logs look like a realistic stream.
         current_time += timedelta(seconds=random.randint(1, 5))
-        time.sleep(1.0 / rate)
+        if sleep:
+            time.sleep(1.0 / rate)
