@@ -1,8 +1,17 @@
 #!/bin/bash
-set -euo pipefail
+set -Eeuo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+
+LOG_DIR="$ROOT/logs"
+LOG_FILE="$LOG_DIR/setup-macos.log"
+mkdir -p "$LOG_DIR"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+trap 'echo "[setup] error at line ${LINENO}: ${BASH_COMMAND}"' ERR
+
+echo "[setup] logging to $LOG_FILE"
 
 if ! command -v brew >/dev/null 2>&1; then
   echo "[setup] Homebrew is required on macOS. Install it from https://brew.sh" >&2

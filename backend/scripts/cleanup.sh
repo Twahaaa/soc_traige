@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -Eeuo pipefail
 
 # Stop the Stage 3 tmux session and clear local pipeline artifacts.
 # Use `--full` to flush the Redis database instead of only deleting the pipeline streams.
@@ -7,6 +7,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SESSION="soc-triage-stage3"
 FULL=false
+LOG_DIR="$ROOT/logs"
+LOG_FILE="$LOG_DIR/cleanup.log"
+mkdir -p "$LOG_DIR"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+trap 'echo "[cleanup] error at line ${LINENO}: ${BASH_COMMAND}"' ERR
+
+echo "[cleanup] logging to $LOG_FILE"
 
 for arg in "$@"; do
   case "$arg" in
