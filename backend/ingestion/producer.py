@@ -29,9 +29,11 @@ def _load_config() -> dict:
         return yaml.safe_load(handle)
 
 
-def _read_log_file(path: Path) -> Iterable[str]:
+def _read_log_file(path: Path, max_lines: int | None = None) -> Iterable[str]:
     with path.open("r", encoding="utf-8", errors="ignore") as handle:
-        for line in handle:
+        for index, line in enumerate(handle):
+            if max_lines is not None and index >= max_lines:
+                break
             cleaned = line.strip()
             if cleaned:
                 yield cleaned
@@ -55,19 +57,28 @@ def main() -> None:
 
     if args.file:
         source = Path(args.file).name
-        log_iter = _read_log_file(Path(args.file))
+        log_iter = _read_log_file(Path(args.file), args.count)
     elif args.dataset_dir:
         dataset_dir = Path(args.dataset_dir)
         source = dataset_dir.name
         dataset_files = []
-        for candidate in (dataset_dir / "HDFS.log", dataset_dir / "BGL.log", dataset_dir / "preprocessed" / "HDFS.log", dataset_dir / "preprocessed" / "BGL.log"):
+        for candidate in (
+            dataset_dir / "HDFS.log",
+            dataset_dir / "BGL.log",
+            dataset_dir / "preprocessed" / "HDFS.log",
+            dataset_dir / "preprocessed" / "BGL.log",
+        ):
             if candidate.exists():
                 dataset_files.append(candidate)
 
         if not dataset_files:
             raise FileNotFoundError(f"No dataset log file found under {dataset_dir}")
 
-        log_iter = (line for file_path in dataset_files for line in _read_log_file(file_path))
+        log_iter = (
+            line
+            for file_path in dataset_files
+            for line in _read_log_file(file_path, args.count)
+        )
     else:
         source = "synthetic"
         log_iter = (entry["log_line"] for entry in generate_logs(args.mode, args.rate, args.count))

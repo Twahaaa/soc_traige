@@ -45,7 +45,7 @@ else
   echo "[cleanup] Redis not reachable, skipped stream cleanup"
 fi
 
-rm -f data/models/neurallog.pt
+rm -f data/models/neurallog*.pt
 
 shopt -s nullglob
 for cache_file in data/embeddings/*.npy; do
