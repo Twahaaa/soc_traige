@@ -11,7 +11,7 @@ LOG_DIR="$ROOT/logs"
 LOG_FILE="$LOG_DIR/run_pipeline.log"
 
 cd "$ROOT"
-source .env 2>/dev/null || true
+[ -f .env ] && source .env || true
 mkdir -p "$LOG_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
