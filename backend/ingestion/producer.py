@@ -46,6 +46,7 @@ def main() -> None:
     parser.add_argument("--rate", type=float, default=10.0)
     parser.add_argument("--count", type=int, default=None)
     parser.add_argument("--file", type=str, default=None)
+    parser.add_argument("--dataset_dir", type=str, default=None)
     args = parser.parse_args()
 
     config = _load_config()
@@ -55,6 +56,18 @@ def main() -> None:
     if args.file:
         source = Path(args.file).name
         log_iter = _read_log_file(Path(args.file))
+    elif args.dataset_dir:
+        dataset_dir = Path(args.dataset_dir)
+        source = dataset_dir.name
+        dataset_files = []
+        for candidate in (dataset_dir / "HDFS.log", dataset_dir / "BGL.log", dataset_dir / "preprocessed" / "HDFS.log", dataset_dir / "preprocessed" / "BGL.log"):
+            if candidate.exists():
+                dataset_files.append(candidate)
+
+        if not dataset_files:
+            raise FileNotFoundError(f"No dataset log file found under {dataset_dir}")
+
+        log_iter = (line for file_path in dataset_files for line in _read_log_file(file_path))
     else:
         source = "synthetic"
         log_iter = (entry["log_line"] for entry in generate_logs(args.mode, args.rate, args.count))

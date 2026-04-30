@@ -150,13 +150,18 @@ def _evaluate(model: NeuralLog, loader: DataLoader) -> tuple[float, float, float
     )
 
 
-def _collect_sequences(dataset: str, synthetic_count: int, window_size: int) -> list[dict[str, Any]]:
+def _collect_sequences(
+    dataset: str,
+    synthetic_count: int,
+    window_size: int,
+    max_lines: int | None,
+) -> list[dict[str, Any]]:
     if dataset == "synthetic":
         return _sequences_from_synthetic(synthetic_count, window_size)
     if dataset == "hdfs":
-        return _sequences_from_loader(HDFSLoader().load_sequences("data/raw"))
+        return _sequences_from_loader(HDFSLoader().load_sequences("data/raw", max_lines=max_lines))
     if dataset == "bgl":
-        return _sequences_from_loader(BGLLoader().load_sequences("data/raw"))
+        return _sequences_from_loader(BGLLoader().load_sequences("data/raw", max_lines=max_lines))
     raise ValueError("dataset must be synthetic, hdfs, or bgl")
 
 
@@ -168,12 +173,13 @@ def main() -> None:
     parser.add_argument("--dataset", choices=["synthetic", "hdfs", "bgl"], default="synthetic")
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--synthetic_count", type=int, default=5000)
-    parser.add_argument("--output", type=str, default="data/models/neurallog.pt")
+    parser.add_argument("--output", type=str, default=None)
+    parser.add_argument("--max_lines", type=int, default=None)
     args = parser.parse_args()
 
     config = _load_config()
     window_size = int(config["neurallog"]["window_size"])
-    sequences = _collect_sequences(args.dataset, args.synthetic_count, window_size)
+    sequences = _collect_sequences(args.dataset, args.synthetic_count, window_size, args.max_lines)
     if not sequences:
         raise RuntimeError("No sequences available for training")
 
@@ -221,7 +227,15 @@ def main() -> None:
             recall,
         )
 
-    output_path = Path(args.output)
+    if args.output is None:
+        if args.dataset == "hdfs":
+            output_path = Path("data/models/neurallog_hdfs.pt")
+        elif args.dataset == "bgl":
+            output_path = Path("data/models/neurallog_bgl.pt")
+        else:
+            output_path = Path("data/models/neurallog.pt")
+    else:
+        output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
         {
