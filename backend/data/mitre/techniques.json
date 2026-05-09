@@ -1,0 +1,140 @@
+[{
+  "technique_id": "T1110",
+  "technique_name": "Brute Force",
+  "tactic": "Credential Access",
+  "keywords": ["failed password", "authentication failure", "invalid user", "failed login"],
+  "description": "Adversaries may use brute force techniques to gain access to accounts when passwords are unknown or when password hashes are obtained."
+},
+{
+  "technique_id": "T1021.004",
+  "technique_name": "SSH Remote Services",
+  "tactic": "Lateral Movement",
+  "keywords": ["sshd", "ssh2", "openssh", "ssh remote"],
+  "description": "Adversaries may use SSH to log into remote systems for lateral movement or remote execution."
+},
+{
+  "technique_id": "T1548.003",
+  "technique_name": "Sudo and Sudo Caching",
+  "tactic": "Privilege Escalation",
+  "keywords": ["sudo", "command=/bin/bash", "command=/bin/sh", "sudo caching"],
+  "description": "Adversaries may abuse sudo capabilities to execute commands with elevated privileges."
+},
+{
+  "technique_id": "T1059.004",
+  "technique_name": "Unix Shell",
+  "tactic": "Execution",
+  "keywords": ["/bin/bash", "/bin/sh", "bash[", "shell"],
+  "description": "Adversaries may abuse Unix shell commands to execute malicious code."
+},
+{
+  "technique_id": "T1190",
+  "technique_name": "Exploit Public-Facing Application",
+  "tactic": "Initial Access",
+  "keywords": ["exploit", "critical", "memory allocation failure", "public-facing"],
+  "description": "Adversaries may exploit vulnerabilities in public-facing applications."
+},
+{
+  "technique_id": "T1046",
+  "technique_name": "Network Service Discovery",
+  "tactic": "Discovery",
+  "keywords": ["port", "service", "sshd", "open port"],
+  "description": "Adversaries may attempt to get a listing of services running on remote hosts."
+},
+{
+  "technique_id": "T1083",
+  "technique_name": "File and Directory Discovery",
+  "tactic": "Discovery",
+  "keywords": ["pwd=", "ls", "file", "directory"],
+  "description": "Adversaries may enumerate files and directories to locate sensitive information."
+},
+{
+  "technique_id": "T1105",
+  "technique_name": "Ingress Tool Transfer",
+  "tactic": "Command and Control",
+  "keywords": ["download", "transfer", "/dev/tcp/", "shell"],
+  "description": "Adversaries may transfer tools or files from an external system into a compromised environment."
+},
+{
+  "technique_id": "T1071.004",
+  "technique_name": "DNS Application Layer Protocol",
+  "tactic": "Command and Control",
+  "keywords": ["dns", "query", "name system"],
+  "description": "Adversaries may communicate using application layer protocols associated with DNS."
+},
+{
+  "technique_id": "T1133",
+  "technique_name": "External Remote Services",
+  "tactic": "Initial Access",
+  "keywords": ["remote services", "ssh", "vpn", "external"],
+  "description": "Adversaries may leverage external-facing remote services to gain access to internal networks."
+},
+{
+  "technique_id": "T1098",
+  "technique_name": "Account Manipulation",
+  "tactic": "Persistence",
+  "keywords": ["userroot", "add user", "account"],
+  "description": "Adversaries may manipulate accounts to maintain or raise access to systems."
+},
+{
+  "technique_id": "T1053.003",
+  "technique_name": "Cron",
+  "tactic": "Execution",
+  "keywords": ["cron", "run-parts", "scheduled"],
+  "description": "Adversaries may abuse cron jobs for execution or persistence."
+},
+{
+  "technique_id": "T1070.002",
+  "technique_name": "Clear Linux or Mac System Logs",
+  "tactic": "Defense Evasion",
+  "keywords": ["log", "clear", "syslog"],
+  "description": "Adversaries may clear system logs to cover their tracks."
+},
+{
+  "technique_id": "T1087.001",
+  "technique_name": "Local Account Discovery",
+  "tactic": "Discovery",
+  "keywords": ["user", "account", "login"],
+  "description": "Adversaries may look for local system or domain accounts."
+},
+{
+  "technique_id": "T1049",
+  "technique_name": "System Network Connections Discovery",
+  "tactic": "Discovery",
+  "keywords": ["network", "connection", "port"],
+  "description": "Adversaries may try to discover common connection information to monitor or interact with systems."
+},
+{
+  "technique_id": "T1057",
+  "technique_name": "Process Discovery",
+  "tactic": "Discovery",
+  "keywords": ["process", "pid", "systemd"],
+  "description": "Adversaries may attempt to get information about running processes."
+},
+{
+  "technique_id": "T1078",
+  "technique_name": "Valid Accounts",
+  "tactic": "Initial Access",
+  "keywords": ["accepted password", "root", "valid user"],
+  "description": "Adversaries may obtain and abuse credentials of existing accounts."
+},
+{
+  "technique_id": "T1136.001",
+  "technique_name": "Create Local Account",
+  "tactic": "Persistence",
+  "keywords": ["adduser", "useradd", "create account"],
+  "description": "Adversaries may create a local account to maintain access to a system."
+},
+{
+  "technique_id": "T1547.006",
+  "technique_name": "Kernel Modules",
+  "tactic": "Persistence",
+  "keywords": ["kernel", "module", "rootkit"],
+  "description": "Adversaries may load malicious kernel modules for persistence or execution."
+},
+{
+  "technique_id": "T1014",
+  "technique_name": "Rootkit",
+  "tactic": "Defense Evasion",
+  "keywords": ["rootkit", "hide", "kernel"],
+  "description": "Adversaries may use rootkits to hide the presence of malware."
+}]

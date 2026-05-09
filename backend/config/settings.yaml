@@ -29,7 +29,7 @@ llm:
   provider: groq            # groq (default) or ollama (fallback)
   ollama_model: gemma3:4b
   ollama_base_url: http://localhost:11434
-  groq_model: llama3-70b-8192
+  groq_model: llama-3.1-8b-instant
   # groq_api_key loaded from GROQ_API_KEY env var
 
 api:
