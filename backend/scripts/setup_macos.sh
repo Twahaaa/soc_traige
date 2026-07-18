@@ -41,4 +41,10 @@ else
   echo "[setup] Started Redis with brew services"
 fi
 
+if command -v docker >/dev/null 2>&1; then
+  "$(dirname "${BASH_SOURCE[0]}")/setup_qdrant.sh"
+else
+  echo "[setup] docker not found; skipping Qdrant setup"
+fi
+
 echo "[setup] macOS environment ready"

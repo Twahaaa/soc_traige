@@ -58,3 +58,19 @@ class IPReputationChecker:
                 if not any(pattern.match(match) for pattern in self.PRIVATE_PATTERNS):
                     return match
         return None
+
+    @staticmethod
+    def extract_public_ip_from_text(log_text: str) -> Optional[str]:
+        """Extract the first non-private IPv4 address from a block of text."""
+        for match in re.findall(r"\b(\d{1,3}(?:\.\d{1,3}){3})\b", log_text):
+            if not any(
+                pattern.match(match)
+                for pattern in (
+                    re.compile(r"^10\."),
+                    re.compile(r"^192\.168\."),
+                    re.compile(r"^172\.(1[6-9]|2\d|3[0-1])\."),
+                    re.compile(r"^127\."),
+                )
+            ):
+                return match
+        return None

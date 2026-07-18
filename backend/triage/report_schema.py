@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class IPReputation(BaseModel):
@@ -25,16 +25,16 @@ class MITREAttack(BaseModel):
 class TriageReport(BaseModel):
     incident_id: str
     timestamp: str
-    severity: str
+    severity: Literal["Critical", "High", "Medium", "Low", "Informational"]
     title: str
     affected_host: str
     log_source: str
     anomaly_score: float
     description: str
-    evidence: list[str]
-    cve_references: list[str]
+    evidence: list[str] = Field(default_factory=list)
+    cve_references: list[str] = Field(default_factory=list)
     ip_reputation: Optional[IPReputation] = None
     mitre_attack: Optional[MITREAttack] = None
-    remediation_steps: list[str]
-    similar_past_incidents: list[str]
+    remediation_steps: list[str] = Field(default_factory=list)
+    similar_past_incidents: list[str] = Field(default_factory=list)
     detection_source: str

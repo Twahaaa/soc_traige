@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from triage.report_schema import MITREAttack
 
@@ -22,13 +22,17 @@ class MITREMapper:
         with path.open("r", encoding="utf-8") as handle:
             self.techniques = json.load(handle)
 
+    @staticmethod
+    def _score_technique(joined_text: str, technique: dict[str, Any]) -> int:
+        keywords = [str(keyword).lower() for keyword in technique.get("keywords", [])]
+        return sum(1 for keyword in keywords if keyword in joined_text)
+
     def map(self, log_lines: list[str]) -> Optional[MITREAttack]:
         joined = " ".join(log_lines).lower()
         best_match: tuple[int, dict[str, object]] | None = None
 
         for technique in self.techniques:
-            keywords = [str(keyword).lower() for keyword in technique.get("keywords", [])]
-            count = sum(1 for keyword in keywords if keyword in joined)
+            count = self._score_technique(joined, technique)
             if count and (best_match is None or count > best_match[0]):
                 best_match = (count, technique)
 

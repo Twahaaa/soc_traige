@@ -22,6 +22,11 @@ class CVELookup:
         match = self.SOFTWARE_RE.search(text)
         return match.group(1).lower() if match else None
 
+    def extract_keyword(self, log_lines: list[str]) -> str | None:
+        """Extract a known software keyword from a sequence of log lines."""
+        joined = " ".join(log_lines)
+        return self._extract_keyword(joined)
+
     def lookup(self, keyword: str) -> list[dict[str, Any]]:
         if not keyword:
             return []

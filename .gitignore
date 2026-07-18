@@ -27,6 +27,12 @@ backend/build/
 backend/dist/
 backend/wheels/
 backend/*.egg-info
+backend/logs/
+backend/data/embeddings/
+backend/data/raw/
+
+# Qdrant local storage (docker volume mount)
+qdrant_storage/
 
 # General
 .DS_Store
@@ -35,3 +41,6 @@ backend/*.egg-info
 .idea/
 .vscode/
 *.pem
+
+# Editor/agent metadata
+.kilo/
