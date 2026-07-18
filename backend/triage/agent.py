@@ -1,11 +1,10 @@
-"""Stage-4 triage agent with deterministic and Groq-ready execution paths."""
+"""Stage-4 triage agent using a provider-agnostic LLM chain."""
 
 from __future__ import annotations
 
 import json
 import hashlib
 import logging
-import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,12 +13,12 @@ from uuid import uuid4
 
 import numpy as np
 import yaml
-from langchain_core.messages import HumanMessage
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
 from sentence_transformers import SentenceTransformer
 
 from queue.redis_manager import get_redis_client
+from triage.llm.factory import build_chain
 from triage.prompts.triage_prompt import build_prompt
 from triage.report_schema import IPReputation, MITREAttack, TriageReport
 from triage.tools.cve_lookup import CVELookup
@@ -60,29 +59,7 @@ class TriageAgent:
         self.redis_client = get_redis_client()
         self._ensure_collection()
 
-        self.llm = self._build_llm()
-
-    def _build_llm(self):
-        provider = self.config["llm"]["provider"]
-        try:
-            if provider == "groq":
-                from langchain_groq import ChatGroq
-
-                api_key = self._env_or_config("GROQ_API_KEY")
-                if api_key:
-                    return ChatGroq(model=self.config["llm"]["groq_model"], api_key=api_key)
-                raise RuntimeError("GROQ_API_KEY is not set")
-
-            from langchain_ollama import ChatOllama
-
-            return ChatOllama(model=self.config["llm"]["ollama_model"], base_url=self.config["llm"]["ollama_base_url"])
-        except Exception as exc:
-            logger.warning("LLM backend unavailable, using deterministic fallback: %s", exc)
-            return None
-
-    def _env_or_config(self, name: str) -> str | None:
-        value = os.getenv(name, "").strip()
-        return value or None
+        self.llm_chain = build_chain(self.config["llm"])
 
     def _ensure_collection(self) -> None:
         collection_name = self.config["qdrant"]["collection"]
@@ -112,10 +89,8 @@ class TriageAgent:
         cve_results = self.cve_lookup.lookup(keyword) if keyword else []
         similar_incidents = self.historical_lookup.find_similar(log_text)
 
-        if self.config["llm"]["provider"] == "groq":
-            report = self._run_groq_react(raw_lines, anomaly_score, detection_source, mitre_result, ip_result, cve_results, similar_incidents)
-        else:
-            report = self._run_ollama_deterministic(raw_lines, anomaly_score, detection_source, mitre_result, ip_result, cve_results, similar_incidents)
+        prompt = build_prompt(raw_lines, anomaly_score, detection_source, mitre_result, ip_result, cve_results, similar_incidents)
+        report = self._run_llm(prompt, raw_lines, anomaly_score, detection_source)
 
         report.affected_host = self._extract_host(raw_lines)
         report.log_source = str(sequence_message.get("source", "synthetic"))
@@ -131,52 +106,22 @@ class TriageAgent:
         logger.info("Created triage report %s", report.incident_id)
         return report
 
-    def _run_groq_react(
+    def _run_llm(
         self,
+        prompt: str,
         raw_lines: list[str],
         anomaly_score: float,
         detection_source: str,
-        mitre_result: MITREAttack | None,
-        ip_result: IPReputation | None,
-        cve_results: list[dict[str, Any]],
-        similar_incidents: list[dict[str, Any]],
     ) -> TriageReport:
-        prompt = build_prompt(raw_lines, anomaly_score, detection_source, mitre_result, ip_result, cve_results, similar_incidents)
-        if self.llm is None:
+        content = self.llm_chain.invoke(prompt)
+        if content is None:
+            logger.warning("All LLM providers failed; using deterministic fallback")
             return self._fallback_report(raw_lines, anomaly_score, detection_source)
         try:
-            response = self.llm.invoke([HumanMessage(content=prompt)])
-            content = getattr(response, "content", "")
-            if isinstance(content, str):
-                report_json = self._extract_json(content)
-                return self._report_from_payload(report_json, raw_lines, anomaly_score, detection_source)
-            return self._fallback_report(raw_lines, anomaly_score, detection_source)
+            report_json = self._extract_json(content)
+            return self._report_from_payload(report_json, raw_lines, anomaly_score, detection_source)
         except Exception as exc:
-            logger.warning("Groq path failed, falling back: %s", exc)
-            return self._fallback_report(raw_lines, anomaly_score, detection_source)
-
-    def _run_ollama_deterministic(
-        self,
-        raw_lines: list[str],
-        anomaly_score: float,
-        detection_source: str,
-        mitre_result: MITREAttack | None,
-        ip_result: IPReputation | None,
-        cve_results: list[dict[str, Any]],
-        similar_incidents: list[dict[str, Any]],
-    ) -> TriageReport:
-        prompt = build_prompt(raw_lines, anomaly_score, detection_source, mitre_result, ip_result, cve_results, similar_incidents)
-        if self.llm is None:
-            return self._fallback_report(raw_lines, anomaly_score, detection_source)
-        try:
-            response = self.llm.invoke([HumanMessage(content=prompt)])
-            content = getattr(response, "content", response)
-            if isinstance(content, str):
-                report_json = self._extract_json(content)
-                return self._report_from_payload(report_json, raw_lines, anomaly_score, detection_source)
-            return self._fallback_report(raw_lines, anomaly_score, detection_source)
-        except Exception as exc:
-            logger.warning("Ollama path failed, falling back: %s", exc)
+            logger.warning("LLM JSON parse failed (%s); using fallback", exc)
             return self._fallback_report(raw_lines, anomaly_score, detection_source)
 
     def _report_from_payload(

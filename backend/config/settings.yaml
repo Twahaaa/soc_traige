@@ -26,11 +26,43 @@ embedding:
   report_dim: 384
 
 llm:
-  provider: groq            # groq (default) or ollama (fallback)
-  ollama_model: gemma3:4b
-  ollama_base_url: http://localhost:11434
-  groq_model: llama-3.1-8b-instant
-  # groq_api_key loaded from GROQ_API_KEY env var
+  # Ordered list of providers to try; first available + successful one wins.
+  # 'ollama' is always forced to the end by the factory as the local safety net.
+  chain:
+    - groq
+    - openrouter
+    - opencode_go
+    - ollama
+
+  retry:
+    retries_per_provider: 1    # extra attempts after the initial try
+    timeout_seconds: 30        # per-invoke timeout enforced in the client adapter
+
+  providers:
+    groq:
+      model: groq/compound-mini          # Groq's smallest purpose-built mini model
+      temperature: 0.0
+      # api_key: $GROQ_API_KEY (env)
+
+    openrouter:
+      model: meta-llama/llama-3.2-3b-instruct   # 3B params (paid, avoids :free rate limits)
+      base_url: https://openrouter.ai/api/v1
+      temperature: 0.0
+      # api_key: $OPENROUTER_API_KEY (env)
+      # Optional OpenRouter attribution headers (sent verbatim if non-empty):
+      http_referer:
+      x_title:
+
+    opencode_go:
+      model:                          # REQUIRED — fill from OpenCode Go subscription
+      base_url:                       # REQUIRED — OpenAI-compatible /chat/completions endpoint
+      temperature: 0.0
+      # api_key: $OPENCODE_GO_API_KEY (env)
+
+    ollama:
+      model: gemma3:1b                # 1B params; pull with `ollama pull gemma3:1b`
+      base_url: http://localhost:11434
+      temperature: 0.0
 
 api:
   # abuseipdb_key loaded from ABUSEIPDB_API_KEY env var
