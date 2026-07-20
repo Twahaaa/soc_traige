@@ -1,0 +1,6 @@
+"""``python -m dashboard`` launcher — wraps dashboard.main.main()."""
+
+from dashboard.main import main
+
+if __name__ == "__main__":
+    main()
