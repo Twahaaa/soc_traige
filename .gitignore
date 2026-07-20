@@ -47,3 +47,6 @@ qdrant_storage/
 
 # Editor/agent metadata
 .kilo/
+
+
+frontend_design/
