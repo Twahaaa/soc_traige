@@ -1,0 +1,1 @@
+"""Stage-5 FastAPI dashboard serving triage reports to the Next.js frontend."""
